@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type TicTacToe struct {
 	size int
 	rows []int

@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import(
+	"net/http"
+	"log"
+)
+
 
 func main() {
-	fmt.Println("Hello friend")
+	log.Println("Server running on :8080")
+	http.ListenAndServe(":8080", nil)
 }
