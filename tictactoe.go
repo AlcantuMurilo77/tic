@@ -1,11 +1,11 @@
 package main
 
 type TicTacToe struct {
-	size int
-	rows []int
-	cols []int
-	diagonal int
-	antiDiagonal int
+	size int // [ ] 
+	rows []int // -
+	cols []int // |
+	diagonal int // \ 
+	antiDiagonal int // /
 }
 
 func NewTicTacToe(size int) *TicTacToe {
@@ -45,7 +45,6 @@ func (t *TicTacToe) Move(row, col, player int) bool {
 	//by checking if game ended, since we received which players move it is
 	//to determinate the winner we just hvae to return the last to play
 	//e.g won := game.Move(0, 2, 1) player 1 won, if this returned true.
-
 }
 
 func abs(x int) int {
