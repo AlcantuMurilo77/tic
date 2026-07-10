@@ -16,6 +16,13 @@ func NewTicTacToe(size int) *TicTacToe {
 	}
 }
 
+func (t *TicTacToe) checkIfLegalMove(*TicTacToe, row){
+	if &TicTacToe.rows[row] != 0 {
+		return false
+	}
+	true
+}
+
 func (t *TicTacToe) Move(row, col, player int) bool {
 	value := 1 //if X player, the value it increments on the array is 1
 	if player == 2 {
