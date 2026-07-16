@@ -1,49 +1,62 @@
 package main
 
 type TicTacToe struct {
-	size int
-	rows []int
-	cols []int
-	diagonal int
-	antiDiagonal int
+	Size int
+	Board [][]int
+	Rows []int
+	Cols []int
+	Diagonal int
+	AntiDiagonal int
 }
+
+//to update the board we are keeping
+//we just do t.Board[row][col] = player
 
 func NewTicTacToe(size int) *TicTacToe {
+	board := make([][]int, size)
+	for i := range board {
+		board[i] = make([]int, size)
+	}
 	return &TicTacToe {
-		size: size,
-		rows: make([]int, size),
-		cols: make([]int, size),
+		Size: size,
+		Board: board,
+		Rows: make([]int, size),
+		Cols: make([]int, size),
 	}
 }
 
-func (t *TicTacToe) checkIfLegalMove(*TicTacToe, row){
-	if &TicTacToe.rows[row] != 0 {
-		return false
-	}
-	true
+func (t *TicTacToe) CheckIfLegalMove(row int, col int) bool {
+	return t.Board[row][col] == 0
 }
 
-func (t *TicTacToe) Move(row, col, player int) bool {
+func (t *TicTacToe) Move(row int, col int, player int) bool {
+
+	
+  if t.Board[row][col] != 0 {
+      return false
+  }
+  t.Board[row][col] = player
+
 	value := 1 //if X player, the value it increments on the array is 1
 	if player == 2 {
 		value = -1 //if O, it decreases by -1
 	}
 
-	t.rows[row] += value
-	t.cols[col] += value 
+	t.Rows[row] += value
+	t.Cols[col] += value 
 
 	if row == col {
-		t.diagonal += value
+		t.Diagonal += value
 	}
 
-	if row+col == t.size-1 {
-		t.antiDiagonal += value
+	if row+col == t.Size-1 {
+		t.AntiDiagonal += value
 	}
 
-	if abs(t.rows[row]) == t.size ||
-		abs(t.cols[col]) == t.size || 
-		abs(t.diagonal) == t.size ||
-		abs(t.antiDiagonal) == t.size {
+	if abs(t.Rows[row]) == t.Size ||
+		abs(t.Cols[col]) == t.Size || 
+		abs(t.Diagonal) == t.Size ||
+		abs(t.AntiDiagonal) == t.Size {
 		return true //checks if game ended
 	}
 	
