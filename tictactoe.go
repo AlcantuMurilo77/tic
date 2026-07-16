@@ -65,7 +65,6 @@ func (t *TicTacToe) Move(row int, col int, player int) bool {
 	//by checking if game ended, since we received which players move it is
 	//to determinate the winner we just hvae to return the last to play
 	//e.g won := game.Move(0, 2, 1) player 1 won, if this returned true.
-
 }
 
 func abs(x int) int {
