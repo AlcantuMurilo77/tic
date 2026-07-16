@@ -30,6 +30,13 @@ func (t *TicTacToe) CheckIfLegalMove(row int, col int) bool {
 }
 
 func (t *TicTacToe) Move(row int, col int, player int) bool {
+
+	
+  if t.Board[row][col] != 0 {
+      return false
+  }
+  t.Board[row][col] = player
+
 	value := 1 //if X player, the value it increments on the array is 1
 	if player == 2 {
 		value = -1 //if O, it decreases by -1
