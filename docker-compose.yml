@@ -7,13 +7,13 @@ services:
       - "8080:8080"
     restart: unless-stopped
     depends_on: 
-      - mongo
+      - mongodb
     environment:
       REDIS_URL: redis:6379    
-  mongo:
+  mongodb:
       image: mongo:8.0 
-      container_name: mongodb
-      restart: always
+      container_name: tic-mongodb
+      restart: unless-stopped
       ports:
         - "27017:27017"
       environment:
@@ -21,7 +21,6 @@ services:
         MONGO_INITDB_ROOT_PASSWORD: password
       volumes:
         - mongo-data:/data/db # Persist MongoDB data
-        - mongo-config:/data/configdb # Persist MongoDB configuration
 
 volumes:
   mongo-data:
