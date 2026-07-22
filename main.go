@@ -1,23 +1,49 @@
 package main
 
-import(
-	"net/http"
+import (
+	"context"
 	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/AlcantuMurilo77/tic/internal/controllers"
+	"github.com/AlcantuMurilo77/tic/internal/database"
+	"github.com/AlcantuMurilo77/tic/internal/repository"
+	"github.com/AlcantuMurilo77/tic/internal/services"
+	"github.com/joho/godotenv"
 )
 
-
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Erro ao carregar .env")
+	}
+	uri := os.Getenv("MONGODB_URI")
+
+	client, err := database.Connect(uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db := client.Database(os.Getenv("DATABASE_NAME"))
+	gameRepository := repository.NewGameRepository(db) //gameRepository
+	gameService := services.NewGameService(gameRepository)
+	gameController := controllers.NewGameController(gameService)
+
+	http.HandleFunc("/games", gameController.Create)
+
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := client.Disconnect(ctx); err != nil {
+			log.Println(err)
+		}
+	}()
+
 	log.Println("Server running on :8080")
-	game := NewTicTacToe(3)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
 
-	game.Move(0,0, 1)
-	game.Move(1,0,1)
-	game.Move(2, 0, 1)
-	result := game.Move(2, 0, 2)
-
-
-	log.Println(game.Rows)
-	log.Println(game.Cols)
-	log.Println(result)
-	http.ListenAndServe(":8080", nil)
 }
