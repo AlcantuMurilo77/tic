@@ -1,0 +1,53 @@
+package controllers
+
+import (
+	"encoding/json"
+	"github.com/AlcantuMurilo77/tic/internal/services"
+	"github.com/google/uuid"
+	"net/http"
+)
+
+type GameController struct {
+	gameService *services.GameService
+}
+
+type CreateGameRequest struct {
+	UserX uuid.UUID `json:"user_x"`
+	UserO uuid.UUID `json:"user_o"`
+}
+
+func NewGameController(service *services.GameService) *GameController {
+	return &GameController{
+		gameService: service,
+	}
+}
+
+func (c *GameController) Create(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var request CreateGameRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	game, err := c.gameService.Create(
+		r.Context(),
+		request.UserX,
+		request.UserO,
+	)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+
+	json.NewEncoder(w).Encode(game)
+}

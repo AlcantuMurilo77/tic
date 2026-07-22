@@ -1,15 +1,18 @@
 package main
 
-import(
+import (
 	"context"
-	"net/http"
 	"log"
-	"time"
+	"net/http"
 	"os"
+	"time"
+
+	"github.com/AlcantuMurilo77/tic/internal/controllers"
 	"github.com/AlcantuMurilo77/tic/internal/database"
+	"github.com/AlcantuMurilo77/tic/internal/repository"
+	"github.com/AlcantuMurilo77/tic/internal/services"
 	"github.com/joho/godotenv"
 )
-
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -22,7 +25,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	defer func(){
+	db := client.Database(os.Getenv("DATABASE_NAME"))
+	gameRepository := repository.NewGameRepository(db) //gameRepository
+	gameService := services.NewGameService(gameRepository)
+	gameController := controllers.NewGameController(gameService)
+
+	http.HandleFunc("/games", gameController.Create)
+
+	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
