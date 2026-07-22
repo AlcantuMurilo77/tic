@@ -30,7 +30,12 @@ func main() {
 	gameService := services.NewGameService(gameRepository)
 	gameController := controllers.NewGameController(gameService)
 
+	userRepository := repository.NewUserRepository(db)
+	userService := services.NewUserService(userRepository)
+	userController := controllers.NewUserController(userService)
+
 	http.HandleFunc("/games", gameController.Create)
+	http.HandleFunc("/users", userController.Create)
 
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
