@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/AlcantuMurilo77/tic/internal/services"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"log"
 	"net/http"
 )
 
@@ -74,4 +77,30 @@ func (c *GameController) FindAll(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(games); err != nil {
 		return
 	}
+}
+
+func (c *GameController) FindOne(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.URL.Query().Get("game_id")
+	if id == "" {
+		http.Error(w, "missing id", http.StatusBadRequest)
+		return
+	}
+
+	game, err := c.gameService.FindByID(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			http.Error(w, "game not found", http.StatusNotFound)
+			return
+		}
+		log.Printf("error finding game by id %q: %v", id, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(game)
 }
