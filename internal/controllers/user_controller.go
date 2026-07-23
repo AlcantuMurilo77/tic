@@ -52,3 +52,27 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(user)
 }
+
+func (c *UserController) FindAll(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	users, err := c.userService.FindAll(r.Context())
+	if err != nil {
+		http.Error(
+			w,
+			"failed to retrieve users",
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(users); err != nil {
+		return
+	}
+}

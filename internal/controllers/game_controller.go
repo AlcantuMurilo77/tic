@@ -51,3 +51,27 @@ func (c *GameController) Create(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(game)
 }
+
+func (c *GameController) FindAll(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	games, err := c.gameService.FindAll(r.Context())
+	if err != nil {
+		http.Error(
+			w,
+			"failed to retrieve games",
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(games); err != nil {
+		return
+	}
+}

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/AlcantuMurilo77/tic/internal/models"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -22,4 +23,22 @@ func (r GameRepository) Create(ctx context.Context, game *models.Game) error {
 		return err
 	}
 	return nil
+}
+
+func (r *GameRepository) FindAll(ctx context.Context) ([]models.Game, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+
+	games := make([]models.Game, 0)
+
+	if err := cursor.All(ctx, &games); err != nil {
+		return nil, err
+	}
+
+	return games, nil
+
 }

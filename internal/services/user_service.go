@@ -36,3 +36,12 @@ func (s *UserService) Create(
 	}
 	return user, nil
 }
+
+func (s *UserService) FindAll(ctx context.Context) ([]models.User, error) {
+	users, err := s.userRepository.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
