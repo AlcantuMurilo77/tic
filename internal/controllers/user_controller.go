@@ -3,42 +3,43 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/AlcantuMurilo77/tic/internal/services"
-	"github.com/google/uuid"
 	"net/http"
 )
 
-type GameController struct {
-	gameService *services.GameService
+type UserController struct {
+	userService *services.UserService
 }
 
-type CreateGameRequest struct {
-	UserX uuid.UUID `json:"user_x"`
-	UserO uuid.UUID `json:"user_o"`
+type CreateUserRequest struct {
+	Name    string `json:"name"`
+	Country string `json:"country"`
+	Xman    bool   `json:"xman"`
 }
 
-func NewGameController(service *services.GameService) *GameController {
-	return &GameController{
-		gameService: service,
+func NewUserController(service *services.UserService) *UserController {
+	return &UserController{
+		userService: service,
 	}
 }
 
-func (c *GameController) Create(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var request CreateGameRequest
+	var request CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	game, err := c.gameService.Create(
+	user, err := c.userService.Create(
 		r.Context(),
-		request.UserX,
-		request.UserO,
+		request.Name,
+		request.Country,
+		request.Xman,
 	)
 
 	if err != nil {
@@ -49,20 +50,20 @@ func (c *GameController) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
-	json.NewEncoder(w).Encode(game)
+	json.NewEncoder(w).Encode(user)
 }
 
-func (c *GameController) FindAll(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) FindAll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	games, err := c.gameService.FindAll(r.Context())
+	users, err := c.userService.FindAll(r.Context())
 	if err != nil {
 		http.Error(
 			w,
-			"failed to retrieve games",
+			"failed to retrieve users",
 			http.StatusInternalServerError,
 		)
 		return
@@ -71,7 +72,7 @@ func (c *GameController) FindAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(games); err != nil {
+	if err := json.NewEncoder(w).Encode(users); err != nil {
 		return
 	}
 }

@@ -42,3 +42,12 @@ func (s *GameService) Create(
 
 	return game, nil
 }
+
+func (s *GameService) FindAll(ctx context.Context) ([]models.Game, error) {
+	games, err := s.gameRepository.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return games, nil
+}
