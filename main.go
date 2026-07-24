@@ -36,8 +36,10 @@ func main() {
 
 	http.HandleFunc("/games", gameController.Create)
 	http.HandleFunc("/games/get_all", gameController.FindAll)
+	http.HandleFunc("/game", gameController.FindOne)
 	http.HandleFunc("/users", userController.Create)
 	http.HandleFunc("/users/get_all", userController.FindAll)
+	http.HandleFunc("/user", userController.FindOne)
 
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

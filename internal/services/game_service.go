@@ -51,3 +51,7 @@ func (s *GameService) FindAll(ctx context.Context) ([]models.Game, error) {
 
 	return games, nil
 }
+
+func (s *GameService) FindByID(ctx context.Context, id string) (*models.Game, error) {
+	return s.gameRepository.FindByID(ctx, id)
+}

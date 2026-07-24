@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/AlcantuMurilo77/tic/internal/models"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -18,6 +20,10 @@ func NewGameRepository(db *mongo.Database) *GameRepository {
 }
 
 func (r GameRepository) Create(ctx context.Context, game *models.Game) error {
+
+	if game.GameUuid == uuid.Nil {
+		game.GameUuid = uuid.New()
+	}
 	_, err := r.collection.InsertOne(ctx, game)
 	if err != nil {
 		return err
@@ -41,4 +47,23 @@ func (r *GameRepository) FindAll(ctx context.Context) ([]models.Game, error) {
 
 	return games, nil
 
+}
+
+func (r *GameRepository) FindByID(ctx context.Context, id string) (*models.Game, error) {
+
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid game id:  %w", err)
+	}
+
+	var game models.Game
+
+	err = r.collection.FindOne(ctx, bson.M{
+		"_id": parsedID,
+	}).Decode(&game)
+
+	if err != nil {
+		return nil, fmt.Errorf("find game: %w", err)
+	}
+	return &game, nil
 }

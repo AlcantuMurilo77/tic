@@ -45,3 +45,7 @@ func (s *UserService) FindAll(ctx context.Context) ([]models.User, error) {
 
 	return users, nil
 }
+
+func (s *UserService) FindByID(ctx context.Context, id string) (*models.User, error) {
+	return s.userRepository.FindByID(ctx, id)
+}
