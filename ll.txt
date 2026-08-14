@@ -1,0 +1,30 @@
+.
+├── docker-compose.yml
+├── Dockerfile
+├── go.mod
+├── go.sum
+├── internal
+│   ├── controllers
+│   │   ├── game_controller.go
+│   │   └── user_controller.go
+│   ├── database
+│   │   └── mongo.go
+│   ├── handlers
+│   │   ├── game_handler.go
+│   │   └── user_handler.go
+│   ├── models
+│   │   ├── game.go
+│   │   └── user.go
+│   ├── repository
+│   │   ├── game_repository.go
+│   │   └── user_repository.go
+│   └── services
+│       ├── game_service.go
+│       └── user_service.go
+├── ll.txt
+├── main.go
+├── README.md
+├── tictactoe.go
+└── tictactoe_test.go
+
+8 directories, 20 files

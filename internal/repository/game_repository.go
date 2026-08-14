@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/AlcantuMurilo77/tic/internal/models"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -41,4 +42,23 @@ func (r *GameRepository) FindAll(ctx context.Context) ([]models.Game, error) {
 
 	return games, nil
 
+}
+
+func (r *GameRepository) FindByID(
+	ctx context.Context,
+	id uuid.UUID,
+) (*models.Game, error) {
+
+	var game models.Game
+
+	err := r.collection.FindOne(
+		ctx,
+		bson.M{"_id": id},
+	).Decode(&game)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &game, nil
 }

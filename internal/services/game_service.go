@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/AlcantuMurilo77/tic/internal/models"
 	"github.com/AlcantuMurilo77/tic/internal/repository"
 	"github.com/google/uuid"
@@ -50,4 +51,24 @@ func (s *GameService) FindAll(ctx context.Context) ([]models.Game, error) {
 	}
 
 	return games, nil
+}
+
+func (s *GameService) Move(
+	ctx context.Context,
+	gameID uuid.UUID,
+	playerID uuid.UUID,
+	row int,
+	col int,
+) (*models.Game, error) {
+
+	game, err := s.gameRepository.FindByID(ctx, gameID)
+	if err != nil {
+		return nil, err
+	}
+
+	if playerID != game.UserX && playerID != game.UserO {
+		return nil, fmt.Errorf("player does not belong to this game")
+	}
+
+	return game, nil
 }

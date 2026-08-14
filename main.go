@@ -34,10 +34,14 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	userController := controllers.NewUserController(userService)
 
+	webSocketService := services.NewWebSocketService()
+	webSocketController := controllers.NewWebSocketController(webSocketService, gameService)
+
 	http.HandleFunc("/games", gameController.Create)
 	http.HandleFunc("/games/get_all", gameController.FindAll)
 	http.HandleFunc("/users", userController.Create)
 	http.HandleFunc("/users/get_all", userController.FindAll)
+	http.HandleFunc("/ws", webSocketController.Connect)
 
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
