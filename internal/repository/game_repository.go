@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"github.com/AlcantuMurilo77/tic/internal/models"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -20,10 +19,6 @@ func NewGameRepository(db *mongo.Database) *GameRepository {
 }
 
 func (r GameRepository) Create(ctx context.Context, game *models.Game) error {
-
-	if game.GameUuid == uuid.Nil {
-		game.GameUuid = uuid.New()
-	}
 	_, err := r.collection.InsertOne(ctx, game)
 	if err != nil {
 		return err
@@ -49,21 +44,39 @@ func (r *GameRepository) FindAll(ctx context.Context) ([]models.Game, error) {
 
 }
 
-func (r *GameRepository) FindByID(ctx context.Context, id string) (*models.Game, error) {
-
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid game id:  %w", err)
-	}
+func (r *GameRepository) FindByID(
+	ctx context.Context,
+	id uuid.UUID,
+) (*models.Game, error) {
 
 	var game models.Game
 
-	err = r.collection.FindOne(ctx, bson.M{
-		"_id": parsedID,
-	}).Decode(&game)
+	err := r.collection.FindOne(
+		ctx,
+		bson.M{"_id": id},
+	).Decode(&game)
 
 	if err != nil {
-		return nil, fmt.Errorf("find game: %w", err)
+		return nil, err
 	}
+
 	return &game, nil
+}
+
+func (r *GameRepository) UpdateBoard(
+	ctx context.Context,
+	gameID uuid.UUID,
+	board [][]int,
+) error {
+	_, err := r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": gameID},
+		bson.M{
+			"$set": bson.M{
+				"board": board,
+			},
+		},
+	)
+
+	return err
 }
