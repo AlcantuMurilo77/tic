@@ -62,3 +62,21 @@ func (r *GameRepository) FindByID(
 
 	return &game, nil
 }
+
+func (r *GameRepository) UpdateBoard(
+	ctx context.Context,
+	gameID uuid.UUID,
+	board [][]int,
+) error {
+	_, err := r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": gameID},
+		bson.M{
+			"$set": bson.M{
+				"board": board,
+			},
+		},
+	)
+
+	return err
+}

@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"fmt"
+
+	"github.com/AlcantuMurilo77/tic/game"
 	"github.com/AlcantuMurilo77/tic/internal/models"
 	"github.com/AlcantuMurilo77/tic/internal/repository"
 	"github.com/google/uuid"
@@ -61,14 +63,46 @@ func (s *GameService) Move(
 	col int,
 ) (*models.Game, error) {
 
-	game, err := s.gameRepository.FindByID(ctx, gameID)
+	gameModel, err := s.gameRepository.FindByID(ctx, gameID)
 	if err != nil {
 		return nil, err
 	}
 
-	if playerID != game.UserX && playerID != game.UserO {
+	if playerID != gameModel.UserX && playerID != gameModel.UserO {
 		return nil, fmt.Errorf("player does not belong to this game")
 	}
 
-	return game, nil
+	if row < 0 || row >= 3 || col < 0 || col >= 3 {
+		return nil, fmt.Errorf("invalid position")
+	}
+
+	player := 1
+	if playerID == gameModel.UserO {
+		player = 2
+	}
+
+	tic := game.NewTicTacToeFromBoard(gameModel.Board)
+
+	if !tic.CheckIfLegalMove(row, col) {
+		return nil, fmt.Errorf("position already occupied")
+	}
+
+	won := tic.Move(row, col, player)
+
+	gameModel.Board = tic.Board
+
+	if won {
+		gameModel.WinnerID = playerID
+		gameModel.EndedAt = time.Now()
+	}
+
+	if err := s.gameRepository.UpdateBoard(
+		ctx,
+		gameID,
+		gameModel.Board,
+	); err != nil {
+		return nil, err
+	}
+
+	return gameModel, nil
 }

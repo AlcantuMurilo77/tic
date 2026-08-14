@@ -1,4 +1,4 @@
-package main
+package game
 
 type TicTacToe struct {
 	Size         int
@@ -71,4 +71,43 @@ func abs(x int) int {
 		return -x
 	}
 	return x
+}
+
+func NewTicTacToeFromBoard(board [][]int) *TicTacToe {
+	size := len(board)
+
+	t := &TicTacToe{
+		Size:  size,
+		Board: board,
+		Rows:  make([]int, size),
+		Cols:  make([]int, size),
+	}
+
+	for row := 0; row < size; row++ {
+		for col := 0; col < size; col++ {
+			player := board[row][col]
+
+			if player == 0 {
+				continue
+			}
+
+			value := 1
+			if player == 2 {
+				value = -1
+			}
+
+			t.Rows[row] += value
+			t.Cols[col] += value
+
+			if row == col {
+				t.Diagonal += value
+			}
+
+			if row+col == size-1 {
+				t.AntiDiagonal += value
+			}
+		}
+	}
+
+	return t
 }
