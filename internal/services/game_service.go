@@ -90,6 +90,7 @@ func (s *GameService) Move(
 		return nil, fmt.Errorf("invalid position")
 	}
 
+	//TODO: renato doesnt like we need to change to X or O
 	player := 1
 	if playerID == gameModel.UserO {
 		player = 2
@@ -101,15 +102,17 @@ func (s *GameService) Move(
 		return nil, fmt.Errorf("position already occupied")
 	}
 
-	won := tic.Move(row, col, player)
+	won := tic.Move(row, col, player) //TODO: two move function names, that's bad
 
 	gameModel.Board = tic.Board
 
 	if won {
 		gameModel.WinnerID = playerID
 		gameModel.EndedAt = time.Now()
+		//TODO: update game model as finished
 	}
 
+	//TODO: bro won but the games still going wtf
 	if playerID == gameModel.UserX {
 		gameModel.CurrentTurn = gameModel.UserO
 	} else {

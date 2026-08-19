@@ -9,6 +9,7 @@ import (
 
 	"github.com/AlcantuMurilo77/tic/internal/controllers"
 	"github.com/AlcantuMurilo77/tic/internal/database"
+	"github.com/AlcantuMurilo77/tic/internal/middleware"
 	"github.com/AlcantuMurilo77/tic/internal/repository"
 	"github.com/AlcantuMurilo77/tic/internal/services"
 	"github.com/joho/godotenv"
@@ -38,12 +39,19 @@ func main() {
 	webSocketHub := services.NewWebsocketHub()
 	webSocketController := controllers.NewWebSocketController(webSocketService, gameService, webSocketHub)
 
-	http.HandleFunc("/games/join", gameController.Join)
-	http.HandleFunc("/games", gameController.Create)
-	http.HandleFunc("/games/get_all", gameController.FindAll)
-	http.HandleFunc("/users", userController.Create)
-	http.HandleFunc("/users/get_all", userController.FindAll)
-	http.HandleFunc("/ws", webSocketController.Connect)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/games/join", gameController.Join)
+	mux.HandleFunc("/games", gameController.Create)
+	mux.HandleFunc("/games/get_all", gameController.FindAll)
+	mux.HandleFunc("/users", userController.Create)
+	mux.HandleFunc("/users/get_all", userController.FindAll)
+	mux.HandleFunc("/ws", webSocketController.Connect)
+
+	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if allowedOrigins == "" {
+		allowedOrigins = "http://localhost:5173"
+	}
+	handler := middleware.CORS(allowedOrigins, mux)
 
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -55,7 +63,7 @@ func main() {
 	}()
 
 	log.Println("Server running on :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatal(err)
 	}
 

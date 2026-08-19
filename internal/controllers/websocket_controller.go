@@ -73,6 +73,16 @@ func (c *WebSocketController) Connect(
 		gameModel.UserO,
 		conn,
 	)
+
+	if playerID == gameModel.UserO {
+		room := c.hub.GetRoom(gameID)
+		if room != nil && room.PlayerX != nil {
+			if err := c.webSocketService.Send(room.PlayerX, gameModel); err != nil {
+				log.Printf("failed to notify player X that player O joined: %v", err)
+			}
+		}
+	}
+
 	defer c.hub.RemovePlayer(
 		gameID,
 		playerID,
