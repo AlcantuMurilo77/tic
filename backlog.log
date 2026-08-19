@@ -1,0 +1,10 @@
+Persist Winner State — Save winner_id and ended_at to the database when a game ends.
+Prevent Moves After Game Over — Reject new moves after a player has won.
+Draw Detection — Detect when the board is full without a winner.
+Player Reconnection — Allow disconnected players to reconnect to an active game.
+Handle Duplicate Connections — Prevent or safely replace multiple WebSocket connections for the same player.
+Game Lobby / Join System — Allow one player to create a game and another player to join using a game ID or room code.
+Player Authentication — Authenticate players instead of relying only on player_id.
+WebSocket Error Handling — Improve handling of unexpected disconnects, malformed messages, and connection failures.
+Game Cleanup — Remove finished or abandoned games and inactive WebSocket rooms.
+Integration Tests — Add automated tests covering multiplayer, turns, invalid moves, broadcast, and victory.

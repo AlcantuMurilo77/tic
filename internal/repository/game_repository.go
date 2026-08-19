@@ -67,13 +67,15 @@ func (r *GameRepository) UpdateBoard(
 	ctx context.Context,
 	gameID uuid.UUID,
 	board [][]int,
+	currentTurn uuid.UUID,
 ) error {
 	_, err := r.collection.UpdateOne(
 		ctx,
 		bson.M{"_id": gameID},
 		bson.M{
 			"$set": bson.M{
-				"board": board,
+				"board":        board,
+				"current_turn": currentTurn,
 			},
 		},
 	)

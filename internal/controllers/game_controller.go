@@ -84,14 +84,21 @@ func (c *GameController) FindOne(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
 	id := r.URL.Query().Get("game_id")
+
 	if id == "" {
 		http.Error(w, "missing id", http.StatusBadRequest)
 		return
 	}
 
-	game, err := c.gameService.FindByID(r.Context(), id)
+	// ver se funciona
+	parsedUuid, err := uuid.Parse(id)
+	if err != nil {
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
+
+	game, err := c.gameService.FindByID(r.Context(), parsedUuid)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			http.Error(w, "game not found", http.StatusNotFound)
