@@ -45,3 +45,19 @@ func TestCORSRejectsUnknownOrigin(t *testing.T) {
 		t.Fatalf("unknown origin must not be allowed, got %q", got)
 	}
 }
+
+func TestCORSWildcardAllowsOrigin(t *testing.T) {
+	handler := CORS("*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/games", nil)
+	req.Header.Set("Origin", "https://game.example.com")
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+
+	if got := response.Header().Get("Access-Control-Allow-Origin"); got != "https://game.example.com" {
+		t.Fatalf("wildcard should echo the request origin, got %q", got)
+	}
+}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -16,15 +17,27 @@ import (
 )
 
 func main() {
+	startedAt := time.Now()
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	slog.SetDefault(logger)
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.LstdFlags | log.LUTC)
+
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Erro ao carregar .env")
+		slog.Info(".env file not loaded; using environment variables", "error", err)
 	}
 	uri := os.Getenv("MONGODB_URI")
+	if uri == "" {
+		slog.Error("MONGODB_URI is required")
+		os.Exit(1)
+	}
 
 	client, err := database.Connect(uri)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("failed to connect to MongoDB", "error", err)
+		os.Exit(1)
 	}
+	slog.Info("connected to MongoDB")
 
 	db := client.Database(os.Getenv("DATABASE_NAME"))
 	gameRepository := repository.NewGameRepository(db) //gameRepository
@@ -38,6 +51,7 @@ func main() {
 	webSocketService := services.NewWebSocketService()
 	webSocketHub := services.NewWebsocketHub()
 	webSocketController := controllers.NewWebSocketController(webSocketService, gameService, webSocketHub)
+	healthController := controllers.NewHealthController(client, startedAt)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/games/join", gameController.Join)
@@ -46,12 +60,19 @@ func main() {
 	mux.HandleFunc("/users", userController.Create)
 	mux.HandleFunc("/users/get_all", userController.FindAll)
 	mux.HandleFunc("/ws", webSocketController.Connect)
+	mux.HandleFunc("/healthz", healthController.Check)
 
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
 		allowedOrigins = "http://localhost:5173"
 	}
-	handler := middleware.CORS(allowedOrigins, mux)
+	handler := middleware.Logging(
+		middleware.Recoverer(
+			middleware.Timeout(10*time.Second,
+				middleware.CORS(allowedOrigins, mux),
+			),
+		),
+	)
 
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -62,9 +83,17 @@ func main() {
 		}
 	}()
 
-	log.Println("Server running on :8080")
-	if err := http.ListenAndServe(":8080", handler); err != nil {
-		log.Fatal(err)
+	server := &http.Server{
+		Addr:              ":8080",
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+
+	slog.Info("server started", "address", server.Addr)
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		slog.Error("server stopped unexpectedly", "error", err)
+		os.Exit(1)
 	}
 
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/AlcantuMurilo77/tic/internal/services"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -46,7 +46,8 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		slog.Error("failed to create user", "name", request.Name, "error", err)
+		http.Error(w, "failed to create user", http.StatusServiceUnavailable)
 		return
 	}
 
@@ -64,6 +65,7 @@ func (c *UserController) FindAll(w http.ResponseWriter, r *http.Request) {
 
 	users, err := c.userService.FindAll(r.Context())
 	if err != nil {
+		slog.Error("failed to retrieve users", "error", err)
 		http.Error(
 			w,
 			"failed to retrieve users",
@@ -98,7 +100,7 @@ func (c *UserController) FindOne(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "game not found", http.StatusNotFound)
 			return
 		}
-		log.Printf("error finding game by id %q: %v", id, err)
+		slog.Error("failed to find user", "user_id", id, "error", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}

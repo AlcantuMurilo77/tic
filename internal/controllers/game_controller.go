@@ -6,7 +6,7 @@ import (
 	"github.com/AlcantuMurilo77/tic/internal/services"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -47,7 +47,8 @@ func (c *GameController) Create(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		slog.Error("failed to create game", "user_x", request.UserX, "error", err)
+		http.Error(w, "failed to create game", http.StatusServiceUnavailable)
 		return
 	}
 
@@ -65,6 +66,7 @@ func (c *GameController) FindAll(w http.ResponseWriter, r *http.Request) {
 
 	games, err := c.gameService.FindAll(r.Context())
 	if err != nil {
+		slog.Error("failed to retrieve games", "error", err)
 		http.Error(
 			w,
 			"failed to retrieve games",
@@ -106,7 +108,7 @@ func (c *GameController) FindOne(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "game not found", http.StatusNotFound)
 			return
 		}
-		log.Printf("error finding game by id %q: %v", id, err)
+		slog.Error("failed to find game", "game_id", id, "error", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -145,6 +147,7 @@ func (c *GameController) Join(w http.ResponseWriter, r *http.Request) {
 		request.UserID,
 	)
 	if err != nil {
+		slog.Error("failed to join game", "game_id", gameID, "user_id", request.UserID, "error", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
