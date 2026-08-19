@@ -24,14 +24,14 @@ func NewGameService(repo *repository.GameRepository) *GameService {
 func (s *GameService) Create(
 	ctx context.Context,
 	userX uuid.UUID,
-	userO uuid.UUID,
 ) (*models.Game, error) {
 
 	game := &models.Game{
 		GameUuid:    uuid.New(),
 		UserX:       userX,
-		UserO:       userO,
+		UserO:       uuid.Nil,
 		CurrentTurn: userX,
+		Status:      models.GameWaiting,
 		StartedAt:   time.Now(),
 		Board: [][]int{
 			{0, 0, 0},
@@ -126,4 +126,44 @@ func (s *GameService) Move(
 	}
 
 	return gameModel, nil
+}
+
+func (s *GameService) Join(
+	ctx context.Context,
+	gameID uuid.UUID,
+	playerID uuid.UUID,
+) (*models.Game, error) {
+
+	game, err := s.gameRepository.FindByID(ctx, gameID)
+	if err != nil {
+		return nil, err
+	}
+
+	if game.Status != models.GameWaiting {
+		return nil, fmt.Errorf("game is not waiting for a player")
+	}
+
+	if game.UserX == playerID {
+		return nil, fmt.Errorf("creator cannot join their own game")
+	}
+
+	if game.UserO != uuid.Nil {
+		return nil, fmt.Errorf("game already has a second player")
+	}
+
+	game.UserO = playerID
+	game.CurrentTurn = game.UserX
+	game.StartedAt = time.Now()
+	game.Status = models.GameReady
+
+	if err := s.gameRepository.Join(
+		ctx,
+		gameID,
+		playerID,
+		game.UserX,
+		game.StartedAt,
+	); err != nil {
+		return nil, err
+	}
+	return game, nil
 }

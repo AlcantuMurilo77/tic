@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 type GameRepository struct {
@@ -80,5 +81,27 @@ func (r *GameRepository) UpdateBoard(
 		},
 	)
 
+	return err
+}
+
+func (r *GameRepository) Join(
+	ctx context.Context,
+	gameID uuid.UUID,
+	userO uuid.UUID,
+	currentTurn uuid.UUID,
+	startedAt time.Time,
+) error {
+	_, err := r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": gameID},
+		bson.M{
+			"$set": bson.M{
+				"user_o":       userO,
+				"status":       models.GameReady,
+				"current_turn": currentTurn,
+				"started_at":   startedAt,
+			},
+		},
+	)
 	return err
 }

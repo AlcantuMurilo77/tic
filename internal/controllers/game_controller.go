@@ -16,7 +16,10 @@ type GameController struct {
 
 type CreateGameRequest struct {
 	UserX uuid.UUID `json:"user_x"`
-	UserO uuid.UUID `json:"user_o"`
+}
+
+type JoinGameRequest struct {
+	UserID uuid.UUID `json:"user_id"`
 }
 
 func NewGameController(service *services.GameService) *GameController {
@@ -41,7 +44,6 @@ func (c *GameController) Create(w http.ResponseWriter, r *http.Request) {
 	game, err := c.gameService.Create(
 		r.Context(),
 		request.UserX,
-		request.UserO,
 	)
 
 	if err != nil {
@@ -108,6 +110,45 @@ func (c *GameController) FindOne(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(game)
+}
+
+func (c *GameController) Join(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	gameIDStr := r.URL.Query().Get("game_id")
+	if gameIDStr == "" {
+		http.Error(w, "missing game id", http.StatusBadRequest)
+		return
+	}
+
+	gameID, err := uuid.Parse(gameIDStr)
+	if err != nil {
+		http.Error(w, "invalid game id", http.StatusBadRequest)
+		return
+	}
+
+	var request JoinGameRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	game, err := c.gameService.Join(
+		r.Context(),
+		gameID,
+		request.UserID,
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(game)
 }

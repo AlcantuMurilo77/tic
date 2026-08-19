@@ -38,6 +38,7 @@ func main() {
 	webSocketHub := services.NewWebsocketHub()
 	webSocketController := controllers.NewWebSocketController(webSocketService, gameService, webSocketHub)
 
+	http.HandleFunc("/games/join", gameController.Join)
 	http.HandleFunc("/games", gameController.Create)
 	http.HandleFunc("/games/get_all", gameController.FindAll)
 	http.HandleFunc("/users", userController.Create)
