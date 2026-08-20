@@ -25,9 +25,12 @@ func NewTicTacToe(size int) *TicTacToe {
 	}
 }
 
+
+
 func (t *TicTacToe) CheckIfLegalMove(row int, col int) bool {
 	return t.Board[row][col] == 0
 }
+
 
 func (t *TicTacToe) Move(row int, col int, player int) bool {
 

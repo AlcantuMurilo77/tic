@@ -65,6 +65,18 @@ func (s *GameService) FindByID(ctx context.Context, id uuid.UUID) (*models.Game,
 	return game, nil
 }
 
+// TODO: Add this as a method for tictactoe engine maybe?
+func boardIsFull(board [][]int) bool {
+	for _, row := range board {
+		for _, cell := range row {
+			if cell == 0 {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func (s *GameService) Move(
 	ctx context.Context,
 	gameID uuid.UUID,
@@ -108,15 +120,23 @@ func (s *GameService) Move(
 
 	if won {
 		gameModel.WinnerID = playerID
+		gameModel.Status = models.GameFinished
 		gameModel.EndedAt = time.Now()
 		//TODO: update game model as finished
+	} else if boardIsFull(gameModel.Board) {
+		gameModel.WinnerID = uuid.Nil
+		gameModel.Status = models.GameFinished
+		gameModel.EndedAt = time.Now()
 	}
 
 	//TODO: bro won but the games still going wtf
-	if playerID == gameModel.UserX {
-		gameModel.CurrentTurn = gameModel.UserO
-	} else {
-		gameModel.CurrentTurn = gameModel.UserX
+
+	if gameModel.Status != models.GameFinished {
+		if playerID == gameModel.UserX {
+			gameModel.CurrentTurn = gameModel.UserO
+		} else {
+			gameModel.CurrentTurn = gameModel.UserX
+		}
 	}
 
 	if err := s.gameRepository.UpdateBoard(
