@@ -8,3 +8,8 @@ type MoveMessage struct {
 	Row      int       `json:"row"`
 	Col      int       `json:"col"`
 }
+
+type WebSocketMessage struct {
+	Type    string `json:"type"`
+	Payload any    `json:"payload"`
+}

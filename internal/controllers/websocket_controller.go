@@ -77,7 +77,7 @@ func (c *WebSocketController) Connect(
 	if playerID == gameModel.UserO {
 		room := c.hub.GetRoom(gameID)
 		if room != nil && room.PlayerX != nil {
-			if err := c.webSocketService.Send(room.PlayerX, gameModel); err != nil {
+			if err := c.hub.SendToConnection(gameID, room.PlayerX, gameModel); err != nil {
 				log.Printf("failed to notify player X that player O joined: %v", err)
 			}
 		}
@@ -108,7 +108,7 @@ func (c *WebSocketController) Connect(
 		if err != nil {
 			log.Printf("failed to process move: %v", err)
 
-			c.webSocketService.Send(conn, map[string]string{
+			c.hub.SendToConnection(gameID, conn, map[string]string{
 				"error": err.Error(),
 			})
 
@@ -122,21 +122,8 @@ func (c *WebSocketController) Connect(
 			continue
 		}
 
-		if room.PlayerX != nil {
-			if err := c.webSocketService.Send(room.PlayerX, game); err != nil {
-				log.Printf("failed to send game state to player X: %v", err)
-			}
-		}
-
-		if room.PlayerO != nil {
-			if err := c.webSocketService.Send(room.PlayerO, game); err != nil {
-				log.Printf("failed to send game state to player O: %v", err)
-			}
-		}
-
-		if err := c.webSocketService.Send(conn, game); err != nil {
-			log.Printf("failed to send game state: %v", err)
-			return
+		for _, err := range c.hub.Broadcast(move.GameID, game) {
+			log.Printf("failed to broadcast game state: %v", err)
 		}
 	}
 }

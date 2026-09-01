@@ -9,9 +9,6 @@ type TicTacToe struct {
 	AntiDiagonal int
 }
 
-//to update the board we are keeping
-//we just do t.Board[row][col] = player
-
 func NewTicTacToe(size int) *TicTacToe {
 	board := make([][]int, size)
 	for i := range board {
@@ -25,12 +22,9 @@ func NewTicTacToe(size int) *TicTacToe {
 	}
 }
 
-
-
 func (t *TicTacToe) CheckIfLegalMove(row int, col int) bool {
 	return t.Board[row][col] == 0
 }
-
 
 func (t *TicTacToe) Move(row int, col int, player int) bool {
 
@@ -39,9 +33,9 @@ func (t *TicTacToe) Move(row int, col int, player int) bool {
 	}
 	t.Board[row][col] = player
 
-	value := 1 //if X player, the value it increments on the array is 1
+	value := 1
 	if player == 2 {
-		value = -1 //if O, it decreases by -1
+		value = -1
 	}
 
 	t.Rows[row] += value
@@ -59,14 +53,11 @@ func (t *TicTacToe) Move(row int, col int, player int) bool {
 		abs(t.Cols[col]) == t.Size ||
 		abs(t.Diagonal) == t.Size ||
 		abs(t.AntiDiagonal) == t.Size {
-		return true //checks if game ended
+		return true
 	}
 
 	return false
 
-	//by checking if game ended, since we received which players move it is
-	//to determinate the winner we just hvae to return the last to play
-	//e.g won := game.Move(0, 2, 1) player 1 won, if this returned true.
 }
 
 func abs(x int) int {

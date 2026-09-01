@@ -18,7 +18,6 @@ type responseRecorder struct {
 	bytes  int
 }
 
-// Hijack preserves support for WebSocket upgrades through the recorder.
 func (w *responseRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	hijacker, ok := w.ResponseWriter.(http.Hijacker)
 	if !ok {
@@ -50,7 +49,6 @@ func (w *responseRecorder) Write(body []byte) (int, error) {
 	return n, err
 }
 
-// Logging emits one structured JSON log after every HTTP request.
 func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		started := time.Now()
@@ -78,7 +76,6 @@ func Logging(next http.Handler) http.Handler {
 	})
 }
 
-// Recoverer prevents a panic from terminating the server and records its stack.
 func Recoverer(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -96,7 +93,6 @@ func Recoverer(next http.Handler) http.Handler {
 	})
 }
 
-// Timeout bounds regular API work while preserving long-lived WebSocket sessions.
 func Timeout(timeout time.Duration, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/ws" {

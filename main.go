@@ -40,7 +40,7 @@ func main() {
 	slog.Info("connected to MongoDB")
 
 	db := client.Database(os.Getenv("DATABASE_NAME"))
-	gameRepository := repository.NewGameRepository(db) //gameRepository
+	gameRepository := repository.NewGameRepository(db)
 	gameService := services.NewGameService(gameRepository)
 	gameController := controllers.NewGameController(gameService)
 
@@ -53,6 +53,14 @@ func main() {
 	webSocketController := controllers.NewWebSocketController(webSocketService, gameService, webSocketHub)
 	healthController := controllers.NewHealthController(client, startedAt)
 
+	rematchRepository := repository.NewRematchRepository(db)
+	if err := rematchRepository.EnsureIndexes(context.Background()); err != nil {
+		slog.Error("failed to create rematch indexes", "error", err)
+		os.Exit(1)
+	}
+	rematchService := services.NewRematchService(rematchRepository, gameRepository)
+	rematchController := controllers.NewRematchController(rematchService, webSocketHub)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/games/join", gameController.Join)
 	mux.HandleFunc("/games", gameController.Create)
@@ -61,6 +69,8 @@ func main() {
 	mux.HandleFunc("/users/get_all", userController.FindAll)
 	mux.HandleFunc("/ws", webSocketController.Connect)
 	mux.HandleFunc("/healthz", healthController.Check)
+	mux.HandleFunc("/games/rematch", rematchController.Request)
+	mux.HandleFunc("/games/rematch/accept", rematchController.Accept)
 
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
