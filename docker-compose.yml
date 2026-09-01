@@ -21,7 +21,7 @@ services:
         MONGO_INITDB_ROOT_USERNAME: root 
         MONGO_INITDB_ROOT_PASSWORD: password
       volumes:
-        - mongo-data:/data/db # Persist MongoDB data
+        - mongo-data:/data/db
 
 volumes:
   mongo-data:

@@ -95,7 +95,6 @@ func (c *GameController) FindOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ver se funciona
 	parsedUuid, err := uuid.Parse(id)
 	if err != nil {
 		http.Error(w, "could not parse id", http.StatusBadRequest)

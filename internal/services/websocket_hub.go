@@ -9,6 +9,57 @@ import (
 type GameRoom struct {
 	PlayerX *websocket.Conn
 	PlayerO *websocket.Conn
+	writeMu sync.Mutex
+}
+
+func (h *WebsocketHub) SendToConnection(
+	gameID uuid.UUID,
+	conn *websocket.Conn,
+	payload any,
+) error {
+	h.mu.RLock()
+	room := h.games[gameID]
+	if room == nil {
+		h.mu.RUnlock()
+		return nil
+	}
+	h.mu.RUnlock()
+
+	if conn == nil {
+		return nil
+	}
+
+	room.writeMu.Lock()
+	defer room.writeMu.Unlock()
+	return conn.WriteJSON(payload)
+}
+
+func (h *WebsocketHub) Broadcast(gameID uuid.UUID, payload any) []error {
+	h.mu.RLock()
+	room := h.games[gameID]
+	if room == nil {
+		h.mu.RUnlock()
+		return nil
+	}
+	playerX := room.PlayerX
+	playerO := room.PlayerO
+	h.mu.RUnlock()
+
+	room.writeMu.Lock()
+	defer room.writeMu.Unlock()
+
+	var errs []error
+	if playerX != nil {
+		if err := playerX.WriteJSON(payload); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if playerO != nil && playerO != playerX {
+		if err := playerO.WriteJSON(payload); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
 }
 
 type WebsocketHub struct {

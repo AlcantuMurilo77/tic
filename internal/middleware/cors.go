@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-// CORS allows browser requests from the configured origins and answers
-// preflight requests before they reach the application handlers.
 func CORS(allowedOrigins string, next http.Handler) http.Handler {
 	origins := make(map[string]struct{})
 	allowAll := false

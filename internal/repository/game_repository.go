@@ -105,3 +105,23 @@ func (r *GameRepository) Join(
 	)
 	return err
 }
+
+func (r *GameRepository) UpdateState(
+	ctx context.Context,
+	game *models.Game,
+) error {
+	_, err := r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": game.GameUuid},
+		bson.M{
+			"$set": bson.M{
+				"board":        game.Board,
+				"current_turn": game.CurrentTurn,
+				"winner_id":    game.WinnerID,
+				"status":       game.Status,
+				"ended_at":     game.EndedAt,
+			},
+		},
+	)
+	return err
+}

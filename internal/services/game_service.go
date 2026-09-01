@@ -56,7 +56,6 @@ func (s *GameService) FindAll(ctx context.Context) ([]models.Game, error) {
 	return games, nil
 }
 
-// check if this shit works
 func (s *GameService) FindByID(ctx context.Context, id uuid.UUID) (*models.Game, error) {
 	game, err := s.gameRepository.FindByID(ctx, id)
 	if err != nil {
@@ -65,7 +64,6 @@ func (s *GameService) FindByID(ctx context.Context, id uuid.UUID) (*models.Game,
 	return game, nil
 }
 
-// TODO: Add this as a method for tictactoe engine maybe?
 func boardIsFull(board [][]int) bool {
 	for _, row := range board {
 		for _, cell := range row {
@@ -102,7 +100,6 @@ func (s *GameService) Move(
 		return nil, fmt.Errorf("invalid position")
 	}
 
-	//TODO: renato doesnt like we need to change to X or O
 	player := 1
 	if playerID == gameModel.UserO {
 		player = 2
@@ -114,7 +111,7 @@ func (s *GameService) Move(
 		return nil, fmt.Errorf("position already occupied")
 	}
 
-	won := tic.Move(row, col, player) //TODO: two move function names, that's bad
+	won := tic.Move(row, col, player)
 
 	gameModel.Board = tic.Board
 
@@ -122,14 +119,11 @@ func (s *GameService) Move(
 		gameModel.WinnerID = playerID
 		gameModel.Status = models.GameFinished
 		gameModel.EndedAt = time.Now()
-		//TODO: update game model as finished
 	} else if boardIsFull(gameModel.Board) {
 		gameModel.WinnerID = uuid.Nil
 		gameModel.Status = models.GameFinished
 		gameModel.EndedAt = time.Now()
 	}
-
-	//TODO: bro won but the games still going wtf
 
 	if gameModel.Status != models.GameFinished {
 		if playerID == gameModel.UserX {
@@ -139,11 +133,9 @@ func (s *GameService) Move(
 		}
 	}
 
-	if err := s.gameRepository.UpdateBoard(
+	if err := s.gameRepository.UpdateState(
 		ctx,
-		gameID,
-		gameModel.Board,
-		gameModel.CurrentTurn,
+		gameModel,
 	); err != nil {
 		return nil, err
 	}
