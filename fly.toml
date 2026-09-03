@@ -1,0 +1,28 @@
+app = "tic-back" # Mude para o nome do seu app na Fly.io
+primary_region = "iad"     # gru = São Paulo (mude para iad se o seu Mongo estiver na Virgínia)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  CORS_ALLOWED_ORIGINS = "https://tic-front-hamsnq99m-number11.vercel.app"
+
+[[services]]
+  internal_port = 33177    
+  protocol = "tcp"        
+
+  [[services.ports]]
+    handlers = []         
+    port = 33177         
+
+  [[services.concurrency]]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 800
+
+  # Configuração de Healthcheck para garantir que a Fly.io saiba que seu app iniciou com sucesso
+  [[services.tcp_checks]]
+    grace_period = "1s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
