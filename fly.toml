@@ -26,3 +26,7 @@ primary_region = "iad"
     # Removido "proxy_proto" para nao corromper requisicoes HTTP/TLS
     handlers = ["tls", "http"] 
     port = 443
+  [services.ports.http_options.response.headers]
+      Access-Control-Allow-Origin = "*"
+      Access-Control-Allow-Methods = "GET,POST,PUT,DELETE,OPTIONS"
+      Access-Control-Allow-Headers = "Origin,Content-Type,Accept,Authorization"
