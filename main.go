@@ -74,7 +74,7 @@ func main() {
 
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
-		allowedOrigins = "http://localhost:5173"
+		allowedOrigins = "*"
 	}
 	handler := middleware.Logging(
 		middleware.Recoverer(
