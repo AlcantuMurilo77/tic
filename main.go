@@ -74,7 +74,7 @@ func main() {
 
 	// allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	// if allowedOrigins == "" {
-		allowedOrigins = "*"
+	allowedOrigins := "*"
 	// }
 	handler := middleware.Logging(
 		middleware.Recoverer(
