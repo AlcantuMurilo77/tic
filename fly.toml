@@ -5,12 +5,25 @@ primary_region = "iad"
   dockerfile = "Dockerfile"
 
 [env]
-  CORS_ALLOWED_ORIGINS = "https://jogodavelha.site,https://www.jogodavelha.site,http://131.196.19.251"
+  CORS_ALLOWED_ORIGINS = "https://jogodavelha.site,https://www.jogodavelha.site,http://131.196.19.251,https://131.196.19.251"
 
 [[services]]
   internal_port = 33177    
   protocol = "tcp"        
 
   [[services.ports]]
-    handlers = []         
+    handlers = ["tcp"]         
     port = 33177         
+
+  [[services.ports]]
+    handlers = ["http"]         
+    port = 8080         
+
+  [[services.ports]]
+    handlers = ["http"]         
+    port = 80         
+
+  [[services.ports]]
+    # Adding proxy_proto here allows your app to see the original client IP
+    handlers = ["proxy_proto", "tls", "http"] 
+    port = 443
