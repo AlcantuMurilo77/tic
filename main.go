@@ -72,10 +72,10 @@ func main() {
 	mux.HandleFunc("/games/rematch", rematchController.Request)
 	mux.HandleFunc("/games/rematch/accept", rematchController.Accept)
 
-	// allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
-	// if allowedOrigins == "" {
-	allowedOrigins := "*"
-	// }
+	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if allowedOrigins == "" {
+		allowedOrigins = "http://localhost:5173"
+	}
 	handler := middleware.Logging(
 		middleware.Recoverer(
 			middleware.Timeout(10*time.Second,

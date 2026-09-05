@@ -8,7 +8,7 @@ primary_region = "iad"
   CORS_ALLOWED_ORIGINS = "https://tic-front-dokxq1595-number11.vercel.app,https://jogodavelha.site,https://www.jogodavelha.site,http://131.196.19.251,https://131.196.19.251"
 
 [[services]]
-  internal_port = 33177    
+  internal_port = 8080
   protocol = "tcp"        
   auto_stop_machines = false
   auto_start_machines = true
@@ -25,13 +25,3 @@ primary_region = "iad"
     # Removido "proxy_proto" para nao corromper requisicoes HTTP/TLS
     handlers = ["tls", "http"] 
     port = 443
-
-  [services.ports.http_options.response.headers]
-      Access-Control-Allow-Origin = "*"
-      Access-Control-Allow-Methods = "GET,POST,PUT,DELETE,OPTIONS"
-      Access-Control-Allow-Headers = "Origin,Content-Type,Accept,Authorization"
-
-  [services.ports.https_options.response.headers]
-      Access-Control-Allow-Origin = "*"
-      Access-Control-Allow-Methods = "GET,POST,PUT,DELETE,OPTIONS"
-      Access-Control-Allow-Headers = "Origin,Content-Type,Accept,Authorization"
